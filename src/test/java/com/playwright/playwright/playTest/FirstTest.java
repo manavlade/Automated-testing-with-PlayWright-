@@ -17,7 +17,7 @@ public class FirstTest extends BaseTest {
     @Test
     public void VerifyTitle(){
         page.navigate("https://www.youtube.com/watch?v=o_COPMFEa6Q&list=PLhW3qG5bs-L_kJz_Z0NnLmQHwLQ_vFFD2&index=2");
-        logger.info("Title of the page is : " + page.title());
+        logger.info("Title of the page is : {}", page.title());
 
         if(page.isVisible("button:has-text('Accept all')")){
             page.click("button:has-text('Accept all')");
@@ -26,10 +26,10 @@ public class FirstTest extends BaseTest {
     }
     public static void main(String[] args) {
         try(Playwright playwright  = Playwright.create()){
-            Browser browser =  playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+            Browser browser =  playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
             page.navigate("https://www.youtube.com/watch?v=o_COPMFEa6Q&list=PLhW3qG5bs-L_kJz_Z0NnLmQHwLQ_vFFD2&index=2");
-            logger.info("Title of the page is : " + page.title());
+            logger.info("Title of the page is : {}", page.title());
             page.close();
             browser.close();
         }
