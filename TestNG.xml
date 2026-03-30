@@ -1,0 +1,7 @@
+<suite>
+    <test name="Playwright Test">
+        <classes>
+            <class name="test.FirstTest.java"/>
+        </classes>
+    </test>
+</suite>
