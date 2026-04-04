@@ -12,6 +12,8 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.BrowserType.LaunchOptions;
+import com.playwright.utils.ConfigReader;
 import com.playwright.utils.ExtentManager;
 import com.playwright.utils.ScreenShotUtility;
 
@@ -24,29 +26,61 @@ public class BaseTest {
 
   @BeforeMethod
   public void setup(Method method) {
+
     extent = ExtentManager.getInstance();
     test = extent.createTest(method.getName());
+
     playwright = Playwright.create();
-    browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false).setSlowMo(1000));
+
+    String browserName = ConfigReader.get("browser");
+    Boolean headless = ConfigReader.getBoolean("headless");
+    int sloMo = ConfigReader.getInt("slowMo");
+    String baseUrl = ConfigReader.get("BASE_URL");
+
+    BrowserType browserType = getBrowserType(browserName);
+
+    browser = browserType.launch(new LaunchOptions().setHeadless(headless).setSlowMo(sloMo));
     page = browser.newPage();
+    page.navigate(baseUrl);
+  }
+
+  private BrowserType getBrowserType(String browserName) {
+    switch (browserName.toLowerCase()) {
+      case "firefox":
+        return playwright.firefox();
+      case "webkit":
+        return playwright.webkit();
+      case "chromium":
+      default:
+        return playwright.chromium();
+    }
   }
 
   @AfterMethod
   public void TearDown(ITestResult result) {
+    String screenShotPath;
 
-    if (result.getStatus() == ITestResult.FAILURE) {
-      test.fail(result.getThrowable());
+    switch (result.getStatus()) {
 
-      String screenShotPath = new ScreenShotUtility().takeScreenShotPage(page, result.getName());
-      test.addScreenCaptureFromBase64String(screenShotPath);
+      case ITestResult.SUCCESS:
+        test.pass("Test passed");
+        screenShotPath = new ScreenShotUtility().takeSuccessScreenShot(page, result.getName());
+        test.addScreenCaptureFromBase64String(screenShotPath);
+        break;
 
-    } else if (result.getStatus() == ITestResult.SUCCESS) {
-      test.pass("Test passed");
-      String screenShotPath = new ScreenShotUtility().takeScreenShotPage(page, result.getName());
-      test.addScreenCaptureFromBase64String(screenShotPath);
+      case ITestResult.FAILURE:
+        test.fail(result.getThrowable());
+        screenShotPath = new ScreenShotUtility().takeFailureScreenShot(page, result.getName());
+        test.addScreenCaptureFromBase64String(screenShotPath);
+        break;
 
-    } else if (result.getStatus() == ITestResult.SKIP) {
-      test.skip("Test skipped");
+      case ITestResult.SKIP:
+        test.skip("Test skipped");
+        break;
+
+      default:
+        test.info("Test completed with unknown status");
+
     }
     extent.flush();
 

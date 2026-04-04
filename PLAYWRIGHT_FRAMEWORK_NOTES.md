@@ -1,4 +1,3 @@
-# Automated-testing-with-PlayWright-
 # Playwright Test Automation Framework - Project Documentation
 
 ## Executive Summary

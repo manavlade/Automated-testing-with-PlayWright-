@@ -1,5 +1,5 @@
 package com.playwright.pages;
 
-public class HomePageTest {
+public class HomePage {
 
 }
